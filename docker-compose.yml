@@ -1,0 +1,43 @@
+version: "3.7"
+
+x-node-template: &node_template
+  build:
+    context: ./node_exporter
+    dockerfile: Dockerfile
+  environment:
+    TZ: "Asia/Tokyo"
+
+services:
+  prometheus:
+    container_name: prometheus
+    build:
+      context: ./prometheus
+      dockerfile: Dockerfile
+      args:
+        buildno: 1
+    volumes:
+      - ./prometheus/conf/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+    ports:
+      - 9090:9090
+    command: "--config.file=/etc/prometheus/prometheus.yml"
+  grafana:
+    container_name: grafana
+    build:
+      context: ./grafana
+      dockerfile: Dockerfile
+    ports:
+      - 3000:3000
+  blackbox_exporter:
+    container_name: blackbox
+    hostname: blackbox
+    build:
+      context: ./blackbox-exporter
+      dockerfile: Dockerfile
+  node_exporter01:
+    <<: *node_template
+    container_name: node_001
+    hostname: node_001
+  node_exporter02:
+    <<: *node_template
+    container_name: node_002
+    hostname: node_002
